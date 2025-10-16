@@ -1,22 +1,41 @@
 import { db, workflow } from "@/db";
 import { inngest } from "./client";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createAnthropic } from "@ai-sdk/anthropic";
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+import { generateText } from "ai";
+
+const openai = createOpenAI();
+const google = createGoogleGenerativeAI();
+const anthropic = createAnthropic();
+
+export const executeAi = inngest.createFunction(
+  { id: "execute-ai" },
+  { event: "execute/ai" },
   async ({ event, step }) => {
-    await step.sleep("wait-a-moment", "1s");
+    await step.ai.wrap("running-gemini", generateText, {
+      model: google("gemini-2.5-flash"),
+      maxRetries: 1,
+      system: "You are a helpful assistant.",
+      prompt:
+        "Help me write a function that takes in a string and returns the string in reverse order.",
+    });
 
-    await step.sleep("wait-a-moment", "1s");
+    await step.ai.wrap("running-openai", generateText, {
+      model: openai("gpt-4.1"),
+      maxRetries: 1,
+      system: "You are a helpful assistant.",
+      prompt:
+        "Help me write a function that takes in a string and returns the string in reverse order.",
+    });
 
-    await step.sleep("wait-a-moment", "5s");
-
-    await step.sleep("wait-a-moment", "2s");
-
-    await step.run("saving-message", async () => {
-      await db.insert(workflow).values({
-        name: "my-whatsapp-message",
-      });
+    await step.ai.wrap("running-anthropic", generateText, {
+      model: anthropic("gemini-2.5-flash"),
+      maxRetries: 1,
+      system: "You are a helpful assistant.",
+      prompt:
+        "Help me write a function that takes in a string and returns the string in reverse order.",
     });
 
     return { message: `Hello ${event.data.email}!` };

@@ -8,14 +8,13 @@ export const appRouter = createTRPCRouter({
   }),
   createWorkflow: baseProcedure.mutation(async () => {
     await inngest.send({
-      name: "test/hello.world",
+      name: "execute/ai",
       data: {
         email: "testUser@example.com",
       },
     });
 
-    console.log("hello-world");
-    return { success: true, message: "Job queued" };
+    return { success: true, message: "AI job queued" };
   }),
 });
 // export type definition of API
