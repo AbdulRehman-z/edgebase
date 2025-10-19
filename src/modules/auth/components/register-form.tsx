@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordStrengthIndicator } from "@/components/custom/password-strength-indicator";
 import { TooltipWrapper } from "@/components/custom/tooltip-wrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +26,12 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordInputWithIndicator } from "@/components/ui/password-input-indicator";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HelpCircleIcon, InfoIcon, MailIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, HelpCircleIcon, InfoIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -57,6 +60,9 @@ const formSchema = z
 
 export const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,6 +73,10 @@ export const RegisterForm = () => {
       confirmPassword: "",
     },
   });
+
+  const togglePasswordVisibility = () => setPasswordVisible((prev) => !prev);
+  const toggleConfirmPasswordVisibility = () =>
+    setConfirmPasswordVisible((prev) => !prev);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     await authClient.signUp.email(
@@ -96,7 +106,7 @@ export const RegisterForm = () => {
   };
 
   return (
-    <Card className="w-full sm:max-w-md border-none">
+    <Card className="w-full sm:max-w-md border shadow-none">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Create your account</CardTitle>
         <CardDescription>
@@ -118,12 +128,12 @@ export const RegisterForm = () => {
             </Field>
           </FieldGroup>
           <FieldSeparator className="my-5">Or continue with</FieldSeparator>
-          <FieldGroup>
+          <FieldGroup className="gap-4">
             <Controller
               name="name"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} orientation={"responsive"}>
                   <FieldLabel htmlFor="name">Name</FieldLabel>
                   <Input
                     disabled={loading}
@@ -142,7 +152,7 @@ export const RegisterForm = () => {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} orientation={"responsive"}>
                   <FieldLabel htmlFor="email">Email</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
@@ -180,25 +190,28 @@ export const RegisterForm = () => {
               name="password"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} orientation={"responsive"}>
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
-                      disabled={loading}
                       {...field}
-                      type="password"
+                      disabled={loading}
                       id="password"
-                      placeholder="Enter your password"
                       aria-invalid={fieldState.invalid}
+                      type={passwordVisible ? "text" : "password"}
+                      placeholder="******"
                     />
-                    <TooltipWrapper content="Include: uppercase, lowercase, number, symbol.">
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupButton variant={"ghost"} size={"icon-xs"}>
-                          <HelpCircleIcon />
-                        </InputGroupButton>
-                      </InputGroupAddon>
-                    </TooltipWrapper>
+                    <InputGroupAddon align={"inline-end"}>
+                      <InputGroupButton onClick={togglePasswordVisibility}>
+                        {passwordVisible ? (
+                          <EyeOffIcon className="size-4" />
+                        ) : (
+                          <EyeIcon className="size-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroupAddon>
                   </InputGroup>
+                  <PasswordStrengthIndicator password={field.value} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -207,18 +220,27 @@ export const RegisterForm = () => {
               name="confirmPassword"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} orientation={"responsive"}>
                   <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
-                      disabled={loading}
                       {...field}
-                      type="password"
+                      disabled={loading}
                       id="confirmPassword"
-                      placeholder="Confirm your password"
                       aria-invalid={fieldState.invalid}
+                      type={confirmPasswordVisible ? "text" : "password"}
+                      placeholder="******"
                     />
-                  </InputGroup>
+                    <InputGroupAddon align={"inline-end"}>
+                      <InputGroupButton onClick={toggleConfirmPasswordVisibility}>
+                        {confirmPasswordVisible ? (
+                          <EyeOffIcon className="size-4" />
+                        ) : (
+                          <EyeIcon className="size-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>{" "}
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
