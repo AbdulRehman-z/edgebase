@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Card,
   CardContent,
@@ -27,6 +28,13 @@ import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import z from "zod";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const formSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
@@ -38,6 +46,9 @@ const formSchema = z.object({
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  const toggleVisibility = () => setVisible((prev) => !prev);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,8 +87,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   return (
     <Card className="w-full sm:max-w-md border-none">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Login to Edgebase</CardTitle>
-        <CardDescription>Welcome back! Please login to continue</CardDescription>
+        <CardTitle className="text-2xl">Welcome Back</CardTitle>
+        <CardDescription>Please login to continue</CardDescription>
       </CardHeader>
       <CardContent>
         <form id="form" onSubmit={form.handleSubmit(onSubmit)}>
@@ -119,14 +130,24 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    type="password"
-                    disabled={loading}
-                    {...field}
-                    id="password"
-                    placeholder="Enter your password"
-                    aria-invalid={fieldState.invalid}
-                  />
+                  <InputGroup>
+                    <InputGroupInput
+                      {...field}
+                      id="password"
+                      aria-invalid={fieldState.invalid}
+                      type={visible ? "text" : "password"}
+                      placeholder="******"
+                    />
+                    <InputGroupAddon align={"inline-end"}>
+                      <InputGroupButton onClick={toggleVisibility}>
+                        {visible ? (
+                          <EyeOffIcon className="size-4" />
+                        ) : (
+                          <EyeIcon className="size-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
