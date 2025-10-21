@@ -2,7 +2,10 @@ import { z } from "zod";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "../init";
 import { inngest } from "@/inngest/client";
 import { db, workflow } from "@/db";
+import { workflowRouter } from "@/modules/workflows/server/procedures";
+
 export const appRouter = createTRPCRouter({
+  workflows: workflowRouter,
   getWorkFlows: baseProcedure.query(async () => {
     return await db.select().from(workflow);
   }),

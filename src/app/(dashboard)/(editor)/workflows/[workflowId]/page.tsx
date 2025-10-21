@@ -1,17 +1,17 @@
 import { requireAuth } from "@/lib/auth-utlis";
 
 type Props = {
-  workflowId: Promise<{ workflowId: string }>;
+  params: Promise<{ workflowId: string }>;
 };
 
-const Page = async ({ workflowId }: Props) => {
+const Page = async ({ params }: Props) => {
   await requireAuth();
 
-  const { workflowId: id } = await workflowId;
+  const { workflowId } = await params;
 
   return (
     <div>
-      <h1>Workflow {id}</h1>
+      <h1>Workflow {workflowId}</h1>
     </div>
   );
 };
