@@ -1,4 +1,5 @@
 "use client";
+
 import { useHasActiveSubscription } from "@/hooks/use-subscriptions";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -74,18 +75,22 @@ export const AppSidebar = () => {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      isActive={pathName === item.path}
+                      isActive={pathName === item.path || pathName.includes(item.path)}
                       asChild
-                      className="h-10 gap-x-4 gap-y-10 px-4"
+                      className="h-10 gap-x-4 gap-y-10 px-4 transition-colors duration-200 hover:text-primary-foreground"
                     >
                       <Link href={item.path} prefetch>
                         <item.icon
-                          className={cn(pathName === item.path ? "text-primary" : "")}
+                          className={cn(
+                            pathName === item.path || pathName.includes(item.path)
+                              ? "text-primary"
+                              : "",
+                          )}
                         />
                         <span
                           className={cn(
                             "font-medium",
-                            pathName === item.path
+                            pathName === item.path || pathName.includes(item.path)
                               ? "text-primary-foreground"
                               : "text-primary-foreground/60",
                           )}
