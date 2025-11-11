@@ -3,16 +3,27 @@ import {
   WorkflowList,
   WorkflowsContainer,
 } from "@/modules/workflows/components/workflow-list";
+import { workflowsParamsLoader } from "@/modules/workflows/server/params-loader";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
-const Page = async () => {
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+const Page = async ({ searchParams }: Props) => {
   await requireAuth();
 
   const queryClient = getQueryClient();
+  const params = await workflowsParamsLoader(searchParams);
 
-  void queryClient.prefetchQuery(trpc.workflows.getAll.queryOptions());
+  void queryClient.prefetchQuery(
+    trpc.workflows.getAll.queryOptions(params, {
+      staleTime: Infinity,
+    }),
+  );
 
   return (
     <WorkflowsContainer>
