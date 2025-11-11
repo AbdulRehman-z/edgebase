@@ -9,7 +9,7 @@ const layout = ({ children }: Props) => {
   return (
     <>
       <AppHeader />
-      <main>{children}</main>
+      <main className="h-full">{children}</main>
     </>
   );
 };
