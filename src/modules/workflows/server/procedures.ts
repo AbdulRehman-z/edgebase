@@ -24,23 +24,25 @@ export const workflowRouter = createTRPCRouter({
   remove: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await db
+      const [data] = await db
         .delete(workflow)
         .where(
-          and(
-            eq(workflow.id, parseInt(input.id)),
-            eq(workflow.userId, parseInt(ctx.auth.user.id)),
-          ),
-        );
+          and(eq(workflow.id, input.id), eq(workflow.userId, parseInt(ctx.auth.user.id))),
+        )
+        .returning({
+          id: workflow.id,
+          name: workflow.name,
+        });
+      return data;
     }),
   updateName: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
         name: z.string().min(2).max(100),
       }),
     )
@@ -49,22 +51,19 @@ export const workflowRouter = createTRPCRouter({
         .update(workflow)
         .set({ name: input.name })
         .where(
-          and(
-            eq(workflow.id, parseInt(input.id)),
-            eq(workflow.userId, parseInt(ctx.auth.user.id)),
-          ),
+          and(eq(workflow.id, input.id), eq(workflow.userId, parseInt(ctx.auth.user.id))),
         );
     }),
   getOne: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
       return await db.query.workflow.findFirst({
         where: and(
-          eq(workflow.id, parseInt(input.id)),
+          eq(workflow.id, input.id),
           eq(workflow.userId, parseInt(ctx.auth.user.id)),
         ),
       });
