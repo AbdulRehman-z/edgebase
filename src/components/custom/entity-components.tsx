@@ -1,4 +1,13 @@
-import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, SearchIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  MoreVerticalIcon,
+  PackageOpenIcon,
+  PlusIcon,
+  SearchIcon,
+  TrashIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { ReactNode, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
@@ -6,6 +15,22 @@ import { ButtonGroup, ButtonGroupSeparator } from "../ui/button-group";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { Kbd, KbdGroup } from "../ui/kbd";
 import { TooltipWrapper } from "./tooltip-wrapper";
+import { Spinner } from "../ui/spinner";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "../ui/empty";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardTitle } from "../ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 type EntityHeaderProps = {
   title: string;
@@ -172,5 +197,178 @@ export const EntityPagination = ({
         </Button>
       </ButtonGroup>
     </div>
+  );
+};
+
+type StateViewProps = {
+  message: string;
+};
+export const LoadingStateView = ({ message }: StateViewProps) => {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia>
+          <Spinner className="size-6" />
+        </EmptyMedia>
+      </EmptyHeader>
+      <EmptyContent>
+        {Boolean(message) && <EmptyDescription>{message}</EmptyDescription>}
+      </EmptyContent>
+    </Empty>
+  );
+};
+
+export const ErrorStateView = ({ message }: StateViewProps) => {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="text-red-500">
+          <TriangleAlertIcon />
+        </EmptyMedia>
+      </EmptyHeader>
+      <EmptyContent>
+        {Boolean(message) && (
+          <EmptyDescription className="text-red-500">{message}</EmptyDescription>
+        )}
+      </EmptyContent>
+    </Empty>
+  );
+};
+
+type EmptyStateViewProps = StateViewProps & {
+  onNew?: () => void;
+  disabled?: boolean;
+};
+
+export const EmptyStateView = ({ onNew, message, disabled }: EmptyStateViewProps) => {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <PackageOpenIcon />
+        </EmptyMedia>
+      </EmptyHeader>
+      <EmptyContent>
+        {Boolean(message) && <EmptyDescription>{message}</EmptyDescription>}
+        {Boolean(onNew) && (
+          <Button onClick={onNew} disabled={disabled}>
+            {disabled ? <Spinner /> : "Add workflow"}
+          </Button>
+        )}
+      </EmptyContent>
+    </Empty>
+  );
+};
+
+type EntityListProps<T> = {
+  items: T[];
+  renderItem: (item: T, index?: number) => ReactNode;
+  getKey: (item: T, index?: number) => string | number;
+  emptyView?: ReactNode;
+  className?: string;
+};
+
+export const EntityList = <T,>({
+  items,
+  getKey,
+  renderItem,
+  className,
+  emptyView,
+}: EntityListProps<T>) => {
+  if (items.length === 0) {
+    return emptyView ? (
+      <div className="flex flex-1 justify-center items-center">{emptyView}</div>
+    ) : null;
+  }
+
+  return (
+    <div className={cn("flex flex-col gap-y-4 pt-10", className)}>
+      {items.map((item, index) => (
+        <div key={getKey(item, index)}>{renderItem(item, index)}</div>
+      ))}
+    </div>
+  );
+};
+
+type EntityItemProps = {
+  href: string;
+  title: string;
+  subtitle?: ReactNode;
+  onRemove?: () => void | Promise<void>;
+  isRemoving: boolean;
+  image?: ReactNode;
+  actions?: ReactNode;
+  className?: string;
+};
+
+export const EntityItem = ({
+  href,
+  title,
+  subtitle,
+  onRemove,
+  isRemoving,
+  image,
+  actions,
+  className,
+}: EntityItemProps) => {
+  const handleRemove = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (isRemoving) {
+      return;
+    }
+
+    if (onRemove) {
+      await onRemove();
+    }
+  };
+
+  return (
+    <Link href={href} prefetch>
+      <Card
+        className={cn(
+          "p-4 shadow-none hover:shadow cursor-pointer py-7",
+          isRemoving && "opacity-50 cursor-not-allowed",
+          className,
+        )}
+      >
+        <CardContent className=" flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            {image}
+            <div>
+              <CardTitle className="text-base font-medium">{title}</CardTitle>
+              {Boolean(subtitle) && (
+                <CardDescription className="text-xs">{subtitle}</CardDescription>
+              )}
+            </div>
+          </div>
+          {(actions || onRemove) && (
+            <div className="flex gap-x-4 items-center">
+              {actions}
+              {onRemove && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVerticalIcon className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem onClick={handleRemove} disabled={isRemoving}>
+                      <TrashIcon className="size-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
