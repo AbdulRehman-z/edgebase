@@ -1,4 +1,4 @@
-import { neon } from "@neondatabase/serverless";
+import * as serverless from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as authSchema from "./schemas/auth-schema";
 import * as workflowSchema from "./schemas/workflow-schema";
@@ -8,7 +8,17 @@ const schema = {
   ...workflowSchema,
 };
 
-const sql = neon(process.env.DATABASE_URL!);
+serverless.defaults.query_timeout = 10000;
+const sql = serverless.neon(process.env.DATABASE_URL as string);
 export const db = drizzle({ client: sql, schema });
 
-export const { account, session, user, verification, workflow } = schema;
+export const {
+  account,
+  session,
+  user,
+  verification,
+  workflow,
+  connection,
+  node,
+  nodeTypeEnum,
+} = schema;

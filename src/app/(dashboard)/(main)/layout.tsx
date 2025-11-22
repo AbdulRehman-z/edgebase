@@ -9,7 +9,7 @@ const layout = ({ children }: Props) => {
   return (
     <>
       <AppHeader />
-      <main className="h-full">{children}</main>
+      <main className="flex-1">{children}</main>
     </>
   );
 };

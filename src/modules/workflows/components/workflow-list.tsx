@@ -1,27 +1,27 @@
 "use client";
 
 import {
-  EmptyStateView,
+  EntityEmptyStateView,
   EntityContainer,
   EntityHeader,
   EntityItem,
   EntityList,
   EntityPagination,
   EntitySearch,
-  ErrorStateView,
-  LoadingStateView,
+  EntityErrorStateView,
+  EntityLoadingStateView,
 } from "@/components/custom/entity-components";
 import { useEntitySearch } from "@/hooks/use-entity-search";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { useUpgrade } from "../hooks/use-upgrade";
-import { useCreateWorkflow, useRemoveWorkflow } from "../hooks/use-workflows";
-import { useWorkflowsParams } from "../hooks/use-workflows-params";
 import { type workflow as WorkflowType } from "@/db/schemas/workflow-schema";
 import { WorkflowIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useWorkflowsParams } from "@/hooks/use-workflows-params";
+import { useCreateWorkflow, useRemoveWorkflow } from "@/hooks/use-workflows";
+import { useUpgrade } from "@/hooks/use-upgrade";
 
 export const WorkflowSearch = () => {
   const [params, setParams] = useWorkflowsParams();
@@ -120,11 +120,11 @@ export const WorkflowsContainer = ({ children }: { children: ReactNode }) => {
 };
 
 export const WorkflowsListError = () => {
-  return <ErrorStateView message="Something went off the rail!!" />;
+  return <EntityErrorStateView message="Something went off the rail!!" />;
 };
 
 export const WorkflowsListLoading = () => {
-  return <LoadingStateView message="Hold on! Loading workflows..." />;
+  return <EntityLoadingStateView message="Hold on! Loading workflows..." />;
 };
 
 export const WorkflowsListEmpty = () => {
@@ -142,7 +142,7 @@ export const WorkflowsListEmpty = () => {
   return (
     <>
       {upgradeComponent}
-      <EmptyStateView
+      <EntityEmptyStateView
         disabled={workflow.isPending}
         message="No workflows found. Create one now!"
         onNew={handleCreate}

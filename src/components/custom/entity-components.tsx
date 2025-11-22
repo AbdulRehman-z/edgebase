@@ -203,7 +203,7 @@ export const EntityPagination = ({
 type StateViewProps = {
   message: string;
 };
-export const LoadingStateView = ({ message }: StateViewProps) => {
+export const EntityLoadingStateView = ({ message }: StateViewProps) => {
   return (
     <Empty>
       <EmptyHeader>
@@ -218,7 +218,7 @@ export const LoadingStateView = ({ message }: StateViewProps) => {
   );
 };
 
-export const ErrorStateView = ({ message }: StateViewProps) => {
+export const EntityErrorStateView = ({ message }: StateViewProps) => {
   return (
     <Empty>
       <EmptyHeader>
@@ -240,7 +240,11 @@ type EmptyStateViewProps = StateViewProps & {
   disabled?: boolean;
 };
 
-export const EmptyStateView = ({ onNew, message, disabled }: EmptyStateViewProps) => {
+export const EntityEmptyStateView = ({
+  onNew,
+  message,
+  disabled,
+}: EmptyStateViewProps) => {
   return (
     <Empty>
       <EmptyHeader>
@@ -336,7 +340,7 @@ export const EntityItem = ({
         <CardContent className=" flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             {image}
-            <div>
+            <div className=" flex flex-col gap-y-1">
               <CardTitle className="text-base font-medium">{title}</CardTitle>
               {Boolean(subtitle) && (
                 <CardDescription className="text-xs">{subtitle}</CardDescription>

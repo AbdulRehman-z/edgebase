@@ -56,7 +56,7 @@ export const AppSidebar = () => {
   const { hasActiveSubscription } = useHasActiveSubscription();
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon" variant="floating">
       <SidebarHeader>
         <SidebarMenuButton asChild className="h-10 gap-x-4 px-4">
           <Link href="/" prefetch>
@@ -65,7 +65,7 @@ export const AppSidebar = () => {
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="">
         {menuItems.map((group) => (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>General</SidebarGroupLabel>
@@ -91,8 +91,8 @@ export const AppSidebar = () => {
                           className={cn(
                             "font-medium",
                             pathName === item.path || pathName.includes(item.path)
-                              ? "text-primary-foreground"
-                              : "text-primary-foreground/60",
+                              ? "text-primary"
+                              : "text-sidebar-foreground/60",
                           )}
                         >
                           {item.title}
@@ -116,7 +116,7 @@ export const AppSidebar = () => {
                 onClick={() => authClient.customer.portal()}
               >
                 <ExternalLinkIcon />
-                <span className="font-medium text-primary-foreground/60">
+                <span className="font-medium text-sidebar-foreground/60">
                   Billing Portal
                 </span>
               </SidebarMenuButton>
