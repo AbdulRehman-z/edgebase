@@ -1,11 +1,11 @@
 "use client";
 
-import { useUpdateWorkflowName } from "@/hooks/use-workflows";
-import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { SaveIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useSaveWorkflow, useUpdateWorkflowName } from "@/hooks/use-workflows";
+import { useTRPC } from "@/trpc/client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,15 +22,36 @@ import {
 } from "../ui/input-group";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Spinner } from "../ui/spinner";
+import { useEditorStore } from "@/lib/store";
+import { toast } from "sonner";
 
 type Props = {
   workflowId: string;
 };
 
 const EditorSaveButton = ({ workflowId }: Props) => {
+  const { editor } = useEditorStore();
+  const saveWorkflow = useSaveWorkflow();
+
+  const handleSave = () => {
+    if (!editor) {
+      toast.error("Editor couldn't be found");
+      return;
+    }
+
+    const nodes = editor.getNodes();
+    const edges = editor.getEdges();
+
+    saveWorkflow.mutate({
+      id: parseInt(workflowId, 10),
+      nodes,
+      edges,
+    });
+  };
+
   return (
     <div className="ml-auto">
-      <Button size="sm" onClick={() => {}} disabled={false}>
+      <Button size="sm" onClick={handleSave} disabled={saveWorkflow.isPending}>
         <SaveIcon className="size-4" />
         Save
       </Button>

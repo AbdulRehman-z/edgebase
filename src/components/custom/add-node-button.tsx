@@ -1,13 +1,19 @@
 import { PlusIcon } from "lucide-react";
+import { useState } from "react";
 import { Button } from "../ui/button";
+import { NodeSelector } from "./node-selector";
 import { TooltipWrapper } from "./tooltip-wrapper";
 
 export const AddNodeButton = () => {
+  const [openSelector, setOpenSelector] = useState(false);
+
   return (
     <TooltipWrapper content="Add node">
-      <Button onClick={() => {}} size={"icon-lg"} variant="outline">
-        <PlusIcon className="size-6" />
-      </Button>
+      <NodeSelector open={openSelector} onOpenChange={setOpenSelector}>
+        <Button onClick={() => {}} size={"icon-lg"} variant="outline">
+          <PlusIcon className="size-6" />
+        </Button>
+      </NodeSelector>
     </TooltipWrapper>
   );
 };

@@ -10,7 +10,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  experimental: {},
+  experimental: {
+    // browserDebugInfoInTerminal:true,
+    // turbopackFileSystemCacheForDev: true,
+    typedEnv: true,
+  },
+  // cacheComponents: true,
+  reactCompiler: true,
+  typedRoutes: true,
 };
 
 export default nextConfig;

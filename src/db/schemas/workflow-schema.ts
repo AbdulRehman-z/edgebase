@@ -1,4 +1,5 @@
-// schema.ts
+import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm"; // Import relations
 import {
   integer,
   json,
@@ -8,11 +9,13 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm"; // Import relations
 import { user } from "./auth-schema";
+import { NODE_TYPES } from "@/lib/types";
 
-export const nodeTypeEnum = pgEnum("NodeType", ["INITIAL"]);
+export const nodeTypeEnum = pgEnum("NodeType", NODE_TYPES);
 
 export const workflow = pgTable("workflow", {
   id: serial("id").primaryKey(),
@@ -32,7 +35,9 @@ export const workflowRelations = relations(workflow, ({ many }) => ({
 }));
 
 export const node = pgTable("node", {
-  id: serial("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
   workflowId: integer("workflow_id")
     .notNull()
     .references(() => workflow.id, { onDelete: "cascade" }),
@@ -62,10 +67,10 @@ export const connection = pgTable(
     workflowId: integer("workflow_id")
       .notNull()
       .references(() => workflow.id, { onDelete: "cascade" }),
-    fromNodeId: integer("from_node_id")
+    fromNodeId: text("from_node_id")
       .notNull()
       .references(() => node.id, { onDelete: "cascade" }),
-    toNodeId: integer("to_node_id")
+    toNodeId: text("to_node_id")
       .notNull()
       .references(() => node.id, { onDelete: "cascade" }),
     fromOutput: text("from_output").default("main").notNull(),

@@ -16,21 +16,23 @@ import {
   Panel,
   ReactFlow,
 } from "@xyflow/react";
+import { useEditorStore } from "@/lib/store";
 import { useTRPC } from "@/trpc/client";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useState } from "react";
-import { nodeComponents } from "@/lib/node-components";
+import { nodeComponents } from "@/modules/workflows/components/node-components";
+import { AddNodeButton } from "../custom/add-node-button";
 import {
   EntityErrorStateView,
   EntityLoadingStateView,
 } from "../custom/entity-components";
-import { AddNodeButton } from "../custom/add-node-button";
 
 type EditorProps = {
   workflowId: string;
 };
 
 export const Editor = ({ workflowId }: EditorProps) => {
+  const { setEditor } = useEditorStore();
   const trpc = useTRPC();
   const { data: workflow } = useSuspenseQuery(
     trpc.workflows.getOne.queryOptions(
@@ -60,16 +62,21 @@ export const Editor = ({ workflowId }: EditorProps) => {
   return (
     <div className="size-full">
       <ReactFlow
-        colorMode="light"
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeComponents}
         onConnect={onConnect}
+        onInit={setEditor}
         fitView
+        snapGrid={[10, 10]}
+        snapToGrid
+        panOnScroll
+        panOnDrag={false}
+        selectionOnDrag
       >
-        <Background variant={BackgroundVariant.Lines} gap={8} lineWidth={0.6} />
+        <Background variant={BackgroundVariant.Lines} gap={16} lineWidth={0.5} />
         <Controls />
         <Panel position="top-right">
           <AddNodeButton />

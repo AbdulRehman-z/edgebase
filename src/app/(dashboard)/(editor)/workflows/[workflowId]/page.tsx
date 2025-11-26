@@ -1,24 +1,20 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { Editor, EditorError, EditorLoading } from "@/components/editor/editor";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { requireAuth } from "@/lib/auth-utlis";
 import { getQueryClient, trpc } from "@/trpc/server";
-import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 
-type Props = {
-  params: Promise<{ workflowId: string }>;
-};
-
-const Page = async ({ params }: Props) => {
+const Page = async (props: PageProps<"/workflows/[workflowId]">) => {
   await requireAuth();
-  const { workflowId } = await params;
+  const { workflowId } = await props.params;
 
   const queryClient = getQueryClient();
 
   void queryClient.prefetchQuery(
     trpc.workflows.getOne.queryOptions(
-      { id: parseInt(workflowId) },
+      { id: parseInt(workflowId, 10) },
       {
         staleTime: Infinity,
       },

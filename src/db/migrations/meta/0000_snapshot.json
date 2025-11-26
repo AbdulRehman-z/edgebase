@@ -1,5 +1,5 @@
 {
-  "id": "36c67388-9643-4bd0-bf7d-8c6ba61d7a09",
+  "id": "ced354be-ac6c-4abb-b903-8cf5891912a0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -329,13 +329,13 @@
         },
         "from_node_id": {
           "name": "from_node_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "to_node_id": {
           "name": "to_node_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -343,14 +343,14 @@
           "name": "from_output",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'main'"
         },
         "to_input": {
           "name": "to_input",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'main'"
         },
         "created_at": {
@@ -368,8 +368,8 @@
         }
       },
       "indexes": {
-        "fromNodeId_toNodeId_fromOutput_toInput": {
-          "name": "fromNodeId_toNodeId_fromOutput_toInput",
+        "connection_from_to_output_input_unique": {
+          "name": "connection_from_to_output_input_unique",
           "columns": [
             {
               "expression": "from_node_id",
@@ -384,13 +384,13 @@
               "nulls": "last"
             },
             {
-              "expression": "to_input",
+              "expression": "from_output",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "from_output",
+              "expression": "to_input",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -455,7 +455,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
@@ -476,14 +476,14 @@
           "name": "position",
           "type": "json",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::json"
+          "notNull": true,
+          "default": "'{\"x\":0,\"y\":0}'::json"
         },
         "data": {
           "name": "data",
           "type": "json",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'{}'::json"
         },
         "created_at": {
@@ -586,7 +586,9 @@
       "name": "NodeType",
       "schema": "public",
       "values": [
-        "INITIAL"
+        "INITIAL",
+        "HTTP_REQUEST",
+        "MANUAL_TRIGGER"
       ]
     }
   },

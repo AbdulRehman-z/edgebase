@@ -9,21 +9,10 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ButtonGroup, ButtonGroupSeparator } from "../ui/button-group";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
-import { Kbd, KbdGroup } from "../ui/kbd";
-import { TooltipWrapper } from "./tooltip-wrapper";
-import { Spinner } from "../ui/spinner";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-} from "../ui/empty";
-import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardTitle } from "../ui/card";
 import {
   DropdownMenu,
@@ -31,6 +20,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "../ui/empty";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
+import { Kbd, KbdGroup } from "../ui/kbd";
+import { Spinner } from "../ui/spinner";
+import { TooltipWrapper } from "./tooltip-wrapper";
 
 type EntityHeaderProps = {
   title: string;
@@ -256,7 +256,7 @@ export const EntityEmptyStateView = ({
         {Boolean(message) && <EmptyDescription>{message}</EmptyDescription>}
         {Boolean(onNew) && (
           <Button onClick={onNew} disabled={disabled}>
-            {disabled ? <Spinner /> : "Add workflow"}
+            Add workflow
           </Button>
         )}
       </EmptyContent>
@@ -332,7 +332,7 @@ export const EntityItem = ({
     <Link href={href} prefetch>
       <Card
         className={cn(
-          "p-4 shadow-none hover:shadow cursor-pointer py-7",
+          "p-4 shadow-none hover:shadow transition-shadow cursor-pointer py-7",
           isRemoving && "opacity-50 cursor-not-allowed",
           className,
         )}

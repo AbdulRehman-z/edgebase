@@ -1,0 +1,129 @@
+import { LoaderCircle } from "lucide-react";
+import type { ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+
+export type NodeStatus = "loading" | "success" | "error" | "initial";
+
+export type NodeStatusVariant = "overlay" | "border";
+
+export type NodeStatusIndicatorProps = {
+  status?: NodeStatus;
+  variant?: NodeStatusVariant;
+  children: ReactNode;
+  className?: string;
+};
+
+export const SpinnerLoadingIndicator = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("relative", className)}>
+      <StatusBorder className="border-blue-700 border-dashed">{children}</StatusBorder>
+      <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
+        <LoaderCircle className={cn("size-5 animate-spin text-blue-700 opacity-70")} />
+      </div>
+    </div>
+  );
+};
+
+export const BorderLoadingIndicator = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <>
+      <div className="absolute -top-px -left-px h-[calc(100%+2px)] w-[calc(100%+2px)]">
+        <style>
+          {`
+        @keyframes spin {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .spinner {
+          animation: spin 2s linear infinite;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 140%;
+          aspect-ratio: 1;
+          transform-origin: center;
+        }
+      `}
+        </style>
+        <div className={cn("absolute inset-0 overflow-hidden rounded-[5px]", className)}>
+          <div className="spinner rounded-full bg-[conic-gradient(from_0deg_at_50%_50%,rgb(42,67,233)_0deg,rgba(42,138,246,0)_360deg)]" />
+        </div>
+      </div>
+      {children}
+    </>
+  );
+};
+
+const StatusBorder = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <>
+      <div
+        className={cn(
+          "absolute -top-px -left-px h-[calc(100%+2px)] w-[calc(100%+2px)] rounded-md border",
+          className,
+        )}
+      />
+      {children}
+    </>
+  );
+};
+
+export const NodeStatusIndicator = ({
+  status,
+  variant = "border",
+  children,
+  className,
+}: NodeStatusIndicatorProps) => {
+  switch (status) {
+    case "loading":
+      switch (variant) {
+        case "overlay":
+          return (
+            <SpinnerLoadingIndicator className={className}>
+              {children}
+            </SpinnerLoadingIndicator>
+          );
+        case "border":
+          return (
+            <BorderLoadingIndicator className={className}>
+              {children}
+            </BorderLoadingIndicator>
+          );
+        default:
+          return <>{children}</>;
+      }
+    case "success":
+      return (
+        <StatusBorder className={cn("border-emerald-600", className)}>
+          {children}
+        </StatusBorder>
+      );
+    case "error":
+      return (
+        <StatusBorder className={cn("border-red-400", className)}>
+          {children}
+        </StatusBorder>
+      );
+    default:
+      return <>{children}</>;
+  }
+};
