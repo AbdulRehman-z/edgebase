@@ -57,15 +57,15 @@ export const HttpTriggerDialog = ({
   });
 
   //reset form values when dialog opens with new defaults
-  // useEffect(() => {
-  //   if (open) {
-  //     form.reset({
-  //       endpoint: defaultEndpoint,
-  //       method: defaultMethod,
-  //       body: defaultBody,
-  //     });
-  //   }
-  // }, [open, defaultBody, defaultEndpoint, defaultMethod, form]);
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        endpoint: defaultEndpoint,
+        method: defaultMethod,
+        body: defaultBody,
+      });
+    }
+  }, [open, defaultBody, defaultEndpoint, defaultMethod, form]);
 
   const showBodyField = form.watch("method") === "POST";
   const bodyPlaceholder = `{
