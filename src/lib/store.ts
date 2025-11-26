@@ -1,14 +1,12 @@
+import type { ReactFlowInstance } from "@xyflow/react";
 import { create } from "zustand";
 
-type State = {
-  open: boolean;
+type EditorStore = {
+  editor: ReactFlowInstance | null;
+  setEditor: (instance: ReactFlowInstance | null) => void;
 };
 
-type Actions = {
-  toggleOpen: () => void;
-};
-
-export const useSidebarState = create<State & Actions>((set) => ({
-  open: true,
-  toggleOpen: () => set((state) => ({ open: !state.open })),
+export const useEditorStore = create<EditorStore>((set) => ({
+  editor: null,
+  setEditor: (instance) => set({ editor: instance }),
 }));

@@ -1,0 +1,170 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
+
+const formSchema = z.object({
+  endpoint: z.url({ message: "Please enter a valid URL" }),
+  method: z.enum(["GET", "POST", "PUT", "DELETE"]),
+  body: z.string().optional(),
+});
+
+export type FormSchema = z.infer<typeof formSchema>;
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  defaultEndpoint?: string;
+  defaultMethod?: "GET" | "POST" | "PUT" | "DELETE";
+  defaultBody?: string;
+};
+
+export const HttpTriggerDialog = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  defaultBody,
+  defaultEndpoint,
+  defaultMethod,
+}: Props) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      endpoint: defaultEndpoint,
+      method: defaultMethod,
+      body: defaultBody,
+    },
+  });
+
+  //reset form values when dialog opens with new defaults
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        endpoint: defaultEndpoint,
+        method: defaultMethod,
+        body: defaultBody,
+      });
+    }
+  }, [open, defaultBody, defaultEndpoint, defaultMethod, form]);
+
+  const showBodyField = form.watch("method") === "POST";
+  const bodyPlaceholder = `{
+    "userId": "{{httpResponse.data.id}}",
+    "name": "{{httpResponse.data.name}}",
+    "items": "{{httpResponse.data.items}}"
+}`;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>HTTP Request</DialogTitle>
+          <DialogDescription>
+            Configure settings for the HTTP Request node.
+          </DialogDescription>
+        </DialogHeader>
+        <form className="space-y-8 mt-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <Controller
+              name="method"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="method">Method</FieldLabel>
+                  <Select
+                    name="method"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger aria-invalid={fieldState.invalid} id="method">
+                      <SelectValue placeholder="POST" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                      <SelectItem value="DELETE">DELETE</SelectItem>
+                      <SelectItem value="PATCH">PATCH</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>
+                    The HTTP method to use for this request
+                  </FieldDescription>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="endpoint"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="endpoint">Endpoint URL</FieldLabel>
+                  <Input
+                    id="endpoint"
+                    placeholder="https://api.example.com/users/{{httpResponse.data.id}}"
+                    {...field}
+                  />
+                  <FieldDescription>
+                    Static URL or use {"{{ "}variables{" }}"} for simple values or {"{{ "}
+                    json variable{" }}"} to stringify objects
+                  </FieldDescription>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
+            {showBodyField && (
+              <Controller
+                name="body"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="body">Request Body</FieldLabel>
+                    <Textarea
+                      id="body"
+                      placeholder={bodyPlaceholder}
+                      className="font-mono text-sm"
+                      {...field}
+                    />
+                    <FieldDescription>
+                      JSON with template variables. Use {"{"}variables{"}"} for simple
+                      values or {"{"}json variable{"}"} to stringify objects
+                    </FieldDescription>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            )}
+          </FieldGroup>
+          <DialogFooter>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Save Node
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

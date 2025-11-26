@@ -1,4 +1,4 @@
-CREATE TYPE "public"."NodeType" AS ENUM('INITIAL');--> statement-breakpoint
+CREATE TYPE "public"."NodeType" AS ENUM('INITIAL', 'HTTP_REQUEST', 'MANUAL_TRIGGER');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -50,20 +50,20 @@ CREATE TABLE "verification" (
 CREATE TABLE "connection" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"workflow_id" integer NOT NULL,
-	"from_node_id" integer NOT NULL,
-	"to_node_id" integer NOT NULL,
-	"from_output" text DEFAULT 'main',
-	"to_input" text DEFAULT 'main',
+	"from_node_id" text NOT NULL,
+	"to_node_id" text NOT NULL,
+	"from_output" text DEFAULT 'main' NOT NULL,
+	"to_input" text DEFAULT 'main' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "node" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"workflow_id" integer NOT NULL,
 	"type" "NodeType" NOT NULL,
-	"position" json DEFAULT '{}'::json,
-	"data" json DEFAULT '{}'::json,
+	"position" json DEFAULT '{"x":0,"y":0}'::json NOT NULL,
+	"data" json DEFAULT '{}'::json NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone NOT NULL
 );
@@ -83,4 +83,4 @@ ALTER TABLE "connection" ADD CONSTRAINT "connection_from_node_id_node_id_fk" FOR
 ALTER TABLE "connection" ADD CONSTRAINT "connection_to_node_id_node_id_fk" FOREIGN KEY ("to_node_id") REFERENCES "public"."node"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "node" ADD CONSTRAINT "node_workflow_id_workflow_id_fk" FOREIGN KEY ("workflow_id") REFERENCES "public"."workflow"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "workflow" ADD CONSTRAINT "workflow_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "fromNodeId_toNodeId_fromOutput_toInput" ON "connection" USING btree ("from_node_id","to_node_id","to_input","from_output");
+CREATE UNIQUE INDEX "connection_from_to_output_input_unique" ON "connection" USING btree ("from_node_id","to_node_id","from_output","to_input");

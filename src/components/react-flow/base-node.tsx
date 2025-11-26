@@ -1,13 +1,18 @@
+import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import type { ComponentProps } from "react";
-
 import { cn } from "@/lib/utils";
+import type { NodeStatus } from "./node-status-indicator";
 
-export function BaseNode({ className, ...props }: ComponentProps<"div">) {
+export function BaseNode({
+  className,
+  status,
+  ...props
+}: ComponentProps<"div"> & { status?: NodeStatus }) {
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground relative rounded-md border",
-        "hover:ring-1",
+        "bg-card  text-card-foreground relative rounded-md border",
+        "hover:ring-[1px] hover:ring-primary hover:ring-offset-1  transition-all",
         // React Flow displays node elements inside of a `NodeWrapper` component,
         // which compiles down to a div with the class `react-flow__node`.
         // When a node is selected, the class `selected` is added to the
@@ -17,9 +22,19 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
         "[.react-flow\\_\\_node.selected_&]:shadow-lg",
         className,
       )}
-      tabIndex={0}
       {...props}
-    />
+    >
+      {props.children}
+      {status === "error" && (
+        <XCircleIcon className=" absolute right-0.5 bottom-0.5 size-2 text-red-700" />
+      )}
+      {status === "success" && (
+        <CheckCircleIcon className="absolute right-0.5 bottom-0.5 size-2 text-green-700" />
+      )}
+      {status === "loading" && (
+        <Loader2Icon className="absolute -right-0.5 -bottom-0.5 size-2 text-blue-700 animate-spin" />
+      )}
+    </div>
   );
 }
 
@@ -27,10 +42,7 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
  * A container for a consistent header layout intended to be used inside the
  * `<BaseNode />` component.
  */
-export function BaseNodeHeader({
-  className,
-  ...props
-}: ComponentProps<"header">) {
+export function BaseNodeHeader({ className, ...props }: ComponentProps<"header">) {
   return (
     <header
       {...props}
@@ -48,10 +60,7 @@ export function BaseNodeHeader({
  * The title text for the node. To maintain a native application feel, the title
  * text is not selectable.
  */
-export function BaseNodeHeaderTitle({
-  className,
-  ...props
-}: ComponentProps<"h3">) {
+export function BaseNodeHeaderTitle({ className, ...props }: ComponentProps<"h3">) {
   return (
     <h3
       data-slot="base-node-title"
@@ -61,10 +70,7 @@ export function BaseNodeHeaderTitle({
   );
 }
 
-export function BaseNodeContent({
-  className,
-  ...props
-}: ComponentProps<"div">) {
+export function BaseNodeContent({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="base-node-content"

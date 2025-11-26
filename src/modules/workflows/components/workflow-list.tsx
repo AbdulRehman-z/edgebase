@@ -1,27 +1,27 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { WorkflowIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import {
-  EntityEmptyStateView,
   EntityContainer,
+  EntityEmptyStateView,
+  EntityErrorStateView,
   EntityHeader,
   EntityItem,
   EntityList,
+  EntityLoadingStateView,
   EntityPagination,
   EntitySearch,
-  EntityErrorStateView,
-  EntityLoadingStateView,
 } from "@/components/custom/entity-components";
+import type { workflow as WorkflowType } from "@/db/schemas/workflow-schema";
 import { useEntitySearch } from "@/hooks/use-entity-search";
-import { useTRPC } from "@/trpc/client";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
-import { type workflow as WorkflowType } from "@/db/schemas/workflow-schema";
-import { WorkflowIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useWorkflowsParams } from "@/hooks/use-workflows-params";
-import { useCreateWorkflow, useRemoveWorkflow } from "@/hooks/use-workflows";
 import { useUpgrade } from "@/hooks/use-upgrade";
+import { useCreateWorkflow, useRemoveWorkflow } from "@/hooks/use-workflows";
+import { useWorkflowsParams } from "@/hooks/use-workflows-params";
+import { useTRPC } from "@/trpc/client";
 
 export const WorkflowSearch = () => {
   const [params, setParams] = useWorkflowsParams();

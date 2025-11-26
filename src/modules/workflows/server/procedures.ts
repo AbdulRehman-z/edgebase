@@ -3,7 +3,7 @@ import type { Edge, Node } from "@xyflow/react";
 import { and, desc, eq, ilike } from "drizzle-orm";
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
-import { db, node, nodeTypeEnum, workflow } from "@/db";
+import { db, node, nodeTypeEnum, workflow, connection } from "@/db";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -11,6 +11,8 @@ import {
   MIN_PAGE_SIZE,
 } from "@/lib/constants";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
+import { NodeType, NODE_TYPES } from "@/lib/types";
+import { da } from "zod/v4/locales";
 
 export const workflowRouter = createTRPCRouter({
   create: premiumProcedure.mutation(async ({ ctx }) => {
@@ -53,6 +55,87 @@ export const workflowRouter = createTRPCRouter({
         });
       return data;
     }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        nodes: z.array(
+          z.object({
+            id: z.string(),
+            type: z.string().nullish(),
+            position: z.object({
+              x: z.number(),
+              y: z.number(),
+            }),
+            data: z.record(z.string(), z.any()).optional(),
+          }),
+        ),
+        edges: z.array(
+          z.object({
+            source: z.string(),
+            target: z.string(),
+            sourceHandle: z.string().nullish(),
+            targetHandle: z.string().nullish(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, edges, nodes, type } = input;
+      const [data] = await db
+        .select()
+        .from(workflow)
+        .where(
+          and(eq(workflow.userId, parseInt(ctx.auth.user.id, 10)), eq(workflow.id, id)),
+        );
+
+      if (!data) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Workflow not found",
+        });
+      }
+
+      await db.batch([
+        db.delete(node).where(eq(node.workflowId, data.id)),
+        db.insert(node).values(
+          nodes.map((n) => {
+            if (!NODE_TYPES.includes(n.type as NodeType)) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `Invalid node type: ${n.type}`,
+              });
+            }
+            return {
+              id: n.id,
+              workflowId: data.id,
+              type: n.type as NodeType,
+              position: n.position,
+              data: n.data,
+            };
+          }),
+        ),
+        db.insert(connection).values(
+          edges.map((e) => ({
+            workflowId: data.id,
+            fromNodeId: e.source,
+            toNodeId: e.target,
+            fromOutput: e.sourceHandle || "main",
+            toInput: e.targetHandle || "main",
+          })),
+        ),
+        db
+          .update(workflow)
+          .set({
+            updatedAt: new Date(),
+          })
+          .where(eq(workflow.id, data.id)),
+      ]);
+
+      return data;
+    }),
+
   updateName: protectedProcedure
     .input(
       z.object({
