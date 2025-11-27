@@ -75,9 +75,9 @@ export const HttpTriggerDialog = ({
   const watchVariableName = form.watch("variableName") || "myApiCall";
   const showBodyField = form.watch("method") === "POST";
   const bodyPlaceholder = `{
-    "userId": "{{httpResponse.data.id}}",
-    "name": "{{httpResponse.data.name}}",
-    "items": "{{httpResponse.data.items}}"
+    "userId": "{{prev-node.httpResponse.data.id}}",
+    "name": "{{prev-node.httpResponse.data.name}}",
+    "items": "{{prev-node.httpResponse.data.items}}"
 }`;
 
   return (
@@ -145,7 +145,7 @@ export const HttpTriggerDialog = ({
                   <FieldLabel htmlFor="endpoint">Endpoint URL</FieldLabel>
                   <Input
                     id="endpoint"
-                    placeholder="https://api.example.com/users/{{httpResponse.data.id}}"
+                    placeholder="https://api.example.com/users/{{prev-node.httpResponse.data.id}}"
                     {...field}
                   />
                   <FieldDescription>
