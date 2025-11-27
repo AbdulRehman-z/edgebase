@@ -4,8 +4,11 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { BaseHandle } from "../react-flow/base-handle";
 import { BaseNode, BaseNodeContent } from "../react-flow/base-node";
+import {
+  type NodeStatus,
+  NodeStatusIndicator,
+} from "../react-flow/node-status-indicator";
 import { WorkflowNode } from "./workflow-node";
-import { NodeStatusIndicator, NodeStatus } from "../react-flow/node-status-indicator";
 
 type BaseTriggerNodeProps = NodeProps & {
   icon: LucideIcon | string;

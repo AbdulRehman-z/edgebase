@@ -1,8 +1,8 @@
-import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import { GlobeIcon } from "lucide-react";
 import { memo, useState } from "react";
 import { BaseExecutionNode } from "./base-execution-node";
-import { FormSchema, HttpTriggerDialog } from "./http-trigger-dialog";
+import { type HttpRequestFormType, HttpTriggerDialog } from "./http-trigger-dialog";
 
 type HttpRequestNodeData = {
   endpoint?: string;
@@ -25,7 +25,7 @@ export const HttpRequestNode = memo((props: NodeProps<HttpReqeustNodeType>) => {
     setDialogOpen(true);
   };
 
-  const handleSubmit = (values: FormSchema) => {
+  const handleSubmit = (values: HttpRequestFormType) => {
     setNodes((nodes) =>
       nodes.map((node) => {
         if (node.id === props.id) {
@@ -33,9 +33,7 @@ export const HttpRequestNode = memo((props: NodeProps<HttpReqeustNodeType>) => {
             ...node,
             data: {
               ...node.data,
-              endpoint: values.endpoint,
-              method: values.method,
-              body: values.body,
+              ...values,
             },
           };
         }
@@ -52,9 +50,7 @@ export const HttpRequestNode = memo((props: NodeProps<HttpReqeustNodeType>) => {
         open={openDialog}
         onOpenChange={setDialogOpen}
         onSubmit={handleSubmit}
-        defaultMethod={nodeData.method}
-        defaultBody={nodeData.body}
-        defaultEndpoint={nodeData.endpoint}
+        defaultValues={nodeData}
       />
       <BaseExecutionNode
         {...props}

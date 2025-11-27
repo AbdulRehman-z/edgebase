@@ -10,7 +10,7 @@ export const AddNodeButton = () => {
   return (
     <TooltipWrapper content="Add node">
       <NodeSelector open={openSelector} onOpenChange={setOpenSelector}>
-        <Button onClick={() => {}} size={"icon-lg"} variant="outline">
+        <Button size={"icon-lg"} variant="secondary">
           <PlusIcon className="size-6" />
         </Button>
       </NodeSelector>

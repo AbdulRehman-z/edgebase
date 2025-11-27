@@ -20,19 +20,21 @@ import { useEditorStore } from "@/lib/store";
 import { useTRPC } from "@/trpc/client";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useState } from "react";
+import { NODE_TYPES, NodeTypesCustom } from "@/lib/types";
 import { nodeComponents } from "@/modules/workflows/components/node-components";
 import { AddNodeButton } from "../custom/add-node-button";
 import {
   EntityErrorStateView,
   EntityLoadingStateView,
 } from "../custom/entity-components";
+import { ExecuteWorkflowButton } from "../custom/execute-workflow-button";
 
 type EditorProps = {
   workflowId: string;
 };
 
 export const Editor = ({ workflowId }: EditorProps) => {
-  const { setEditor } = useEditorStore();
+  const { setEditor, theme } = useEditorStore();
   const trpc = useTRPC();
   const { data: workflow } = useSuspenseQuery(
     trpc.workflows.getOne.queryOptions(
@@ -59,6 +61,10 @@ export const Editor = ({ workflowId }: EditorProps) => {
     [],
   );
 
+  const hasManualTrigger = nodes.some(
+    (node) => node.type === NodeTypesCustom.MANUAL_TRIGGER,
+  );
+
   return (
     <div className="size-full">
       <ReactFlow
@@ -76,11 +82,21 @@ export const Editor = ({ workflowId }: EditorProps) => {
         panOnDrag={false}
         selectionOnDrag
       >
-        <Background variant={BackgroundVariant.Lines} gap={16} lineWidth={0.5} />
+        <Background
+          bgColor="var(--color-background)"
+          variant={BackgroundVariant.Cross}
+          gap={5}
+          lineWidth={0.2}
+        />
         <Controls />
         <Panel position="top-right">
           <AddNodeButton />
         </Panel>
+        {hasManualTrigger && (
+          <Panel position="bottom-center" className="pb-8">
+            <ExecuteWorkflowButton workflowId={workflowId} />
+          </Panel>
+        )}
       </ReactFlow>
     </div>
   );

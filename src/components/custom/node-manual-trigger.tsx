@@ -17,7 +17,7 @@ export const ManualTriggerNode = memo((props: NodeProps) => {
         {...props}
         id={props.id}
         icon={PlayIcon}
-        status=""
+        status="initial"
         name="When clicking 'Execute Workflow'"
         onSettings={handleOpenSettings}
       />
