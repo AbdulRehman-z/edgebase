@@ -1,43 +1,54 @@
-import { db, workflow } from "@/db";
+import { and, eq } from "drizzle-orm";
+import { db, workflow as workflowTable } from "@/db";
 import { inngest } from "./client";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createAnthropic } from "@ai-sdk/anthropic";
+import { topologicalSort } from "./utils";
+import { getExecutor } from "@/modules/workflows/lib/executor-registry";
+import { NodeType } from "@/lib/types";
 
-import { generateText } from "ai";
+// const openai = createOpenAI();
+// const google = createGoogleGenerativeAI();
+// const anthropic = createAnthropic();
 
-const openai = createOpenAI();
-const google = createGoogleGenerativeAI();
-const anthropic = createAnthropic();
-
-export const executeAi = inngest.createFunction(
-  { id: "execute-ai" },
-  { event: "execute/ai" },
+export const executeWorkflow = inngest.createFunction(
+  { id: "execute-workflow" },
+  { event: "workflows/execute.workflow" },
   async ({ event, step }) => {
-    await step.ai.wrap("running-gemini", generateText, {
-      model: google("gemini-2.5-flash"),
-      maxRetries: 1,
-      system: "You are a helpful assistant.",
-      prompt:
-        "Help me write a function that takes in a string and returns the string in reverse order.",
+    const workflowId = event.data.workflowId;
+    await step.sleep("wait", "10s");
+    const sortedNodes = await step.run("prepare-workflow", async () => {
+      const workflow = await db.query.workflow.findFirst({
+        where: and(eq(workflowTable.id, parseInt(workflowId, 10))),
+        with: {
+          nodes: true,
+          connections: true,
+        },
+      });
+
+      if (!workflow) {
+        throw new Error("Workflow not found");
+      }
+
+      if (!workflow.nodes) {
+        throw new Error("Workflow nodes not found");
+      }
+
+      return topologicalSort(workflow.nodes, workflow.connections);
     });
 
-    await step.ai.wrap("running-openai", generateText, {
-      model: openai("gpt-4.1"),
-      maxRetries: 1,
-      system: "You are a helpful assistant.",
-      prompt:
-        "Help me write a function that takes in a string and returns the string in reverse order.",
-    });
+    // Initialize context with any initial data from the trigger
+    let context = event.data.initialData || {};
 
-    await step.ai.wrap("running-anthropic", generateText, {
-      model: anthropic("gemini-2.5-flash"),
-      maxRetries: 1,
-      system: "You are a helpful assistant.",
-      prompt:
-        "Help me write a function that takes in a string and returns the string in reverse order.",
-    });
+    // Execute each node
+    for (const node of sortedNodes) {
+      const executor = getExecutor(node.type as NodeType);
+      context = await executor({
+        data: node.data as Record<string, unknown>,
+        nodeId: node.id,
+        context,
+        step,
+      });
+    }
 
-    return { message: `Hello ${event.data.email}!` };
+    return { sortedNodes, result: context };
   },
 );

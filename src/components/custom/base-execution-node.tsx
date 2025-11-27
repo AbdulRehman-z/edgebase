@@ -4,8 +4,11 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { BaseHandle } from "../react-flow/base-handle";
 import { BaseNode, BaseNodeContent } from "../react-flow/base-node";
+import {
+  NodeStatusIndicator,
+  type NodeStatus,
+} from "../react-flow/node-status-indicator";
 import { WorkflowNode } from "./workflow-node";
-import { NodeStatus } from "../react-flow/node-status-indicator";
 
 type BaseExecutionNodeProps = NodeProps & {
   icon: LucideIcon | string;
@@ -44,18 +47,20 @@ export const BaseExecutionNode = ({
       onSettings={onSettings}
       showToolbar
     >
-      <BaseNode onDoubleClick={onDoubleClick}>
-        <BaseNodeContent>
-          {typeof Icon === "string" ? (
-            <Image src={Icon} alt={name} width={16} height={16} />
-          ) : (
-            <Icon className="size-4 text-muted-foreground" />
-          )}
-          {children}
-          <BaseHandle position={Position.Left} type="target" id="target-1" />
-          <BaseHandle position={Position.Right} type="source" id="source-1" />
-        </BaseNodeContent>
-      </BaseNode>
+      <NodeStatusIndicator status={status}>
+        <BaseNode onDoubleClick={onDoubleClick}>
+          <BaseNodeContent>
+            {typeof Icon === "string" ? (
+              <Image src={Icon} alt={name} width={16} height={16} />
+            ) : (
+              <Icon className="size-4 text-muted-foreground" />
+            )}
+            {children}
+            <BaseHandle position={Position.Left} type="target" id="target-1" />
+            <BaseHandle position={Position.Right} type="source" id="source-1" />
+          </BaseNodeContent>
+        </BaseNode>
+      </NodeStatusIndicator>
     </WorkflowNode>
   );
 };
