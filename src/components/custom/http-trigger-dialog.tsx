@@ -23,6 +23,13 @@ import {
 import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
+  variableName: z
+    .string()
+    .min(1, { message: "Variable name must be at least 1 character long" })
+    .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
+      message:
+        "Variable name must start with a letter or underscore and can only contain letters, numbers, and underscores",
+    }),
   endpoint: z.url({ message: "Please enter a valid URL" }),
   method: z.enum(["GET", "POST", "PUT", "DELETE"]),
   body: z.string().optional(),
@@ -46,6 +53,7 @@ export const HttpTriggerDialog = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      variableName: defaultValues.variableName || "",
       endpoint: defaultValues.endpoint || "",
       method: defaultValues.method || "GET",
       body: defaultValues.body || "",
@@ -56,6 +64,7 @@ export const HttpTriggerDialog = ({
   useEffect(() => {
     if (open) {
       form.reset({
+        variableName: defaultValues.variableName || "",
         endpoint: defaultValues.endpoint || "",
         method: defaultValues.method || "GET",
         body: defaultValues.body || "",
@@ -63,6 +72,7 @@ export const HttpTriggerDialog = ({
     }
   }, [open, defaultValues, form]);
 
+  const watchVariableName = form.watch("variableName") || "myApiCall";
   const showBodyField = form.watch("method") === "POST";
   const bodyPlaceholder = `{
     "userId": "{{httpResponse.data.id}}",
@@ -81,6 +91,22 @@ export const HttpTriggerDialog = ({
         </DialogHeader>
         <form className="space-y-8 mt-5" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
+            <Controller
+              name="variableName"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="variableName">Variable Name</FieldLabel>
+                  <Input id="variableName" placeholder="myApiCall" {...field} />
+                  <FieldDescription>
+                    Use this name to reference the response data in other nodes of your
+                    workflow. {`{{${watchVariableName}.httpResponse.data}}`}
+                  </FieldDescription>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
             <Controller
               name="method"
               control={form.control}

@@ -14,7 +14,6 @@ export const executeWorkflow = inngest.createFunction(
   { event: "workflows/execute.workflow" },
   async ({ event, step }) => {
     const workflowId = event.data.workflowId;
-    await step.sleep("wait", "10s");
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await db.query.workflow.findFirst({
         where: and(eq(workflowTable.id, parseInt(workflowId, 10))),

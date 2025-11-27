@@ -1,8 +1,9 @@
 import { NonRetriableError } from "inngest";
-import type { NodeExecutor } from "../../lib/types";
 import ky, { Options as kyOption } from "ky";
+import type { NodeExecutor } from "../../lib/types";
 
 type HttpRequestData = {
+  variableName: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   endpoint?: string;
   body?: string;
@@ -18,6 +19,10 @@ export const httpTriggerExecutor: NodeExecutor<HttpRequestData> = async ({
     throw new NonRetriableError("HTTP Request node: no endpoint configured");
   }
 
+  if (!data.variableName) {
+    throw new NonRetriableError("HTTP Request node: no variable name configured");
+  }
+
   const endpoint = data.endpoint;
   const method = data.method || "GET";
   const body = data.body;
@@ -27,6 +32,9 @@ export const httpTriggerExecutor: NodeExecutor<HttpRequestData> = async ({
 
     if (["POST", "PUT", "DELETE"].includes(method)) {
       options.body = body;
+      options.headers = {
+        "Content-Type": "application/json",
+      };
     }
 
     const response = await ky(endpoint, options);
@@ -38,7 +46,7 @@ export const httpTriggerExecutor: NodeExecutor<HttpRequestData> = async ({
 
     return {
       ...context,
-      httpResponse: {
+      [data.variableName]: {
         status: response.status,
         statusText: response.statusText,
         body: responseData,
