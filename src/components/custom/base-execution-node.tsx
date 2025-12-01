@@ -9,6 +9,7 @@ import {
   type NodeStatus,
 } from "../react-flow/node-status-indicator";
 import { WorkflowNode } from "./workflow-node";
+import { cn } from "@/lib/utils";
 
 type BaseExecutionNodeProps = NodeProps & {
   icon: LucideIcon | string;
@@ -31,7 +32,6 @@ export const BaseExecutionNode = ({
   children,
 }: BaseExecutionNodeProps) => {
   const { setNodes, setEdges } = useReactFlow();
-
   const handleDelete = () => {
     setNodes((nodes) => nodes.filter((node) => node.id !== nodeId));
     setEdges((edges) =>
@@ -48,12 +48,19 @@ export const BaseExecutionNode = ({
       showToolbar
     >
       <NodeStatusIndicator status={status}>
-        <BaseNode onDoubleClick={onDoubleClick}>
+        <BaseNode status={status} onDoubleClick={onDoubleClick}>
           <BaseNodeContent>
             {typeof Icon === "string" ? (
               <Image src={Icon} alt={name} width={16} height={16} />
             ) : (
-              <Icon className="size-4 text-muted-foreground" />
+              <Icon
+                className={cn(
+                  "size-4 text-muted-foreground",
+                  status === "error" ? "text-red-700" : "",
+                  status === "loading" ? "text-blue-700" : "",
+                  status === "success" ? "text-green-700" : "",
+                )}
+              />
             )}
             {children}
             <BaseHandle position={Position.Left} type="target" id="target-1" />

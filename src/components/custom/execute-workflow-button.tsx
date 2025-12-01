@@ -1,8 +1,8 @@
 import { FlaskConicalIcon } from "lucide-react";
-import { useExecuteWorkflow } from "@/hooks/use-workflows";
-import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useExecuteWorkflow } from "@/hooks/use-workflows";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 type Props = {
   workflowId: string;
@@ -10,7 +10,6 @@ type Props = {
 
 export const ExecuteWorkflowButton = ({ workflowId }: Props) => {
   const workflow = useExecuteWorkflow();
-
   const handleExecute = async () => {
     try {
       await workflow.mutateAsync({ workflowId });

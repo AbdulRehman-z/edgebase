@@ -20,13 +20,16 @@ export function BaseNode({
         // is selected, using Tailwind's `&` selector.
         "[.react-flow\\_\\_node.selected_&]:border-muted-foreground",
         "[.react-flow\\_\\_node.selected_&]:shadow-lg",
+        status === "success" ? "hover:border-green-600" : "",
+        status === "loading" ? "hover:border-blue-600" : "",
+        status === "error" ? "hover:border-red-600" : "",
         className,
       )}
       {...props}
     >
       {props.children}
       {status === "error" && (
-        <XCircleIcon className=" absolute right-0.5 bottom-0.5 size-2 text-red-700" />
+        <XCircleIcon className="absolute right-0.5 bottom-0.5 size-2 text-red-700" />
       )}
       {status === "success" && (
         <CheckCircleIcon className="absolute right-0.5 bottom-0.5 size-2 text-green-700" />
