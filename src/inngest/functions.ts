@@ -1,19 +1,28 @@
 import { and, eq } from "drizzle-orm";
 import { db, workflow as workflowTable } from "@/db";
+import type { NodeType } from "@/lib/types";
+import { getExecutor } from "@/modules/workflows/lib/executor-registry";
+import { httpRequestChannel } from "./channels/http-requests";
 import { inngest } from "./client";
 import { topologicalSort } from "./utils";
-import { getExecutor } from "@/modules/workflows/lib/executor-registry";
-import { NodeType } from "@/lib/types";
 
 // const openai = createOpenAI();
 // const google = createGoogleGenerativeAI();
 // const anthropic = createAnthropic();
 
 export const executeWorkflow = inngest.createFunction(
-  { id: "execute-workflow" },
+  { id: "execute-workflow", retries: 0 },
   { event: "workflows/execute.workflow" },
-  async ({ event, step }) => {
-    const workflowId = event.data.workflowId;
+  async ({ event, step, publish }) => {
+    const workflowId = event.data.workflowId as string;
+
+    await publish(
+      httpRequestChannel().status({
+        nodeId: workflowId,
+        status: "loading",
+      }),
+    );
+
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await db.query.workflow.findFirst({
         where: and(eq(workflowTable.id, parseInt(workflowId, 10))),
@@ -45,6 +54,7 @@ export const executeWorkflow = inngest.createFunction(
         nodeId: node.id,
         context,
         step,
+        publish,
       });
     }
 
